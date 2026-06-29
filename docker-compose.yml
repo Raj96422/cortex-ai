@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  cortex-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cortex-ai-app
+    ports:
+      - "8501:8501"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - EMBEDDING_MODEL=models/text-embedding-004
+      - LLM_MODEL=gemini-1.5-flash
+    volumes:
+      - chroma_data:/app/chroma_db
+      - uploaded_pdfs:/app/pdfs
+      - app_logs:/app/logs
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+    driver: local
+  uploaded_pdfs:
+    driver: local
+  app_logs:
+    driver: local

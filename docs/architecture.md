@@ -1,75 +1,81 @@
-# Ingestion Pipeline Architecture
+# Comprehensive System Architecture
 
-This document describes the architectural flow and software engineering principles of the Cortex AI Intelligent Document Ingestion Pipeline.
-
-## Architectural Flow
-
-The pipeline operates in a sequential, deterministic flow where inputs are validated, stored, parsed, chunked, and registered for downstream indexing.
-
-```mermaid
-graph TD
-    A[User Upload / Streamlit UploadedFile] --> B[Validation]
-    B -->|Checks Extension, Size, Emptiness| C[Generate SHA-256 Hash]
-    C --> D[Duplicate Detection]
-    D -->|Hash Exists in processed_files.json| E[Skip Duplicate & Log]
-    D -->|New Hash| F[Save Uploaded PDF to pdfs/]
-    F -->|Name Collision Suffix Handling| G[PDF Loader]
-    G -->|Skip Blank Pages / Handle Encryption / Parse Page-by-Page| H[Chunker]
-    H -->|Split using RecursiveCharacterTextSplitter| I[Output Chunks with Preserved Metadata]
-```
-
-### Detailed Ingestion Steps
-
-1. **User Upload**:
-   Files are received as binary file streams (e.g. Streamlit `UploadedFile` streams or python file-like objects).
-   
-2. **Validation**:
-   The orchestrator checks:
-   - **Extension**: Only files ending with `.pdf` (case-insensitive) are accepted (configured in `ALLOWED_EXTENSIONS` from [constants.py](file:///e:/Cortex%20Ai/utils/constants.py)).
-   - **Emptiness**: Files with `0` bytes are skipped.
-   - **File Size**: Files exceeding the size limit (e.g. `MAX_FILE_SIZE_MB` from [constants.py](file:///e:/Cortex%20Ai/utils/constants.py)) are rejected.
-   
-3. **SHA-256 Hash Generation**:
-   A cryptographic SHA-256 checksum is generated based on the file content. This checksum uniquely identifies the document.
-   
-4. **Duplicate Detection**:
-   The generated hash is compared against the registry database (`pdfs/processed_files.json`). If the hash is found, the file is classified as a duplicate and skipped.
-   
-5. **Save Uploaded PDF**:
-   New documents are saved inside the local `pdfs/` storage directory. If a file with the same filename already exists on disk (but has a different content hash), the orchestrator appends the first 8 characters of the content hash to the saved name (e.g., `report_a2f8b9e1.pdf`) to avoid overwriting files.
-   
-6. **PDF Loader**:
-   Invokes the extraction module to read pages from the saved path.
-   - Page text is parsed page-by-page.
-   - Blank pages containing no text are filtered out.
-   - If the file is encrypted, the loader tries empty-password decryption.
-   - It builds LangChain `Document` objects with precise metadata tags for downstream tracking.
-   
-7. **Chunker**:
-   The documents are parsed into overlapping text chunks using `RecursiveCharacterTextSplitter`.
-   - Groups pages by `document_id` and sorts them chronologically.
-   - Chunks text based on `DEFAULT_CHUNK_SIZE` and `DEFAULT_CHUNK_OVERLAP` constants.
-   - Injects relative, sequential tracking identifiers (`chunk_index`, `chunk_id`) on each chunk.
-   
-8. **Output Chunks**:
-   The generated list of LangChain `Document` chunks is returned to the ingestion caller.
+This document describes the architectural flow, component relationships, and software engineering principles of the Cortex AI RAG system.
 
 ---
 
-## Architectural Principles
+## 1. End-to-End System Diagrams
 
-### 1. Clean Architecture & Separation of Concerns
-The ingestion system partitions tasks into focused, decoupled components:
-- **Exceptions**: Centralized domain error models defined in [exceptions.py](file:///e:/Cortex%20Ai/core/exceptions.py).
-- **Extraction (PDF Loader)**: Encapsulated strictly in [pdf_loader.py](file:///e:/Cortex%20Ai/core/pdf_loader.py) with no dependency on upload formats, hashing, or chunking.
-- **Splitter (Chunker)**: Encapsulated in [chunker.py](file:///e:/Cortex%20Ai/core/chunker.py), parsing only standard `Document` objects.
-- **Orchestration (Document Processor)**: Placed in [document_processor.py](file:///e:/Cortex%20Ai/core/document_processor.py), which implements storage, validation, and calling logic.
+Cortex AI partitions tasks into two main workflows: **Document Ingestion** and **Conversational Query Retrieval (RAG)**.
 
-### 2. SOLID Design Principles
-- **Single Responsibility (SRP)**: Each class/module performs exactly one task. `PdfReader` extracts, `TextSplitter` segments, `DocumentProcessor` orchestrates.
-- **Open/Closed (OCP)**: Parameters like chunk sizes, allowed extensions, and file sizes are configurable through constants, enabling behavioral changes without modifying implementation code.
-- **Dependency Inversion (DIP)**: High-level modules do not import or couple with Streamlit details. Instead, file streams are accepted as standard Python file-like objects.
+### Ingestion Flow
+```mermaid
+graph TD
+    PDF[PDF File Upload] -->|1. Stream uploaded bytes| DP[DocumentProcessor]
+    DP -->|2. Validate extension, size, and emptiness| VAL{IsValid?}
+    VAL -->|No| ERR[Raise Custom Ingestion Exception]
+    VAL -->|Yes| HASH[Calculate SHA-256 Hash]
+    HASH --> DUP{Hash in Registry?}
+    DUP -->|Yes| SKIP[Skip Duplicate File]
+    DUP -->|No| SAVE[Save to disk in pdfs/ & Suffix collision names]
+    SAVE --> LOAD[Load PDF Text page-by-page]
+    LOAD --> SPLIT[Split into Chunks using Recursive Splitter]
+    SPLIT --> EMB[EmbeddingService]
+    EMB -->|3. Query Gemini Embeddings| API[models/text-embedding-004]
+    API -->|4. Return 768-dim Vector| EMB
+    EMB -->|5. Convert to EmbeddedChunk| REPO[VectorRepository]
+    REPO -->|6. Store vectors & metadata| DB[(ChromaDB)]
+```
 
-### 3. Production-Ready Resilience
-- **Error Boundaries**: Specific custom exceptions are raised during failure modes. The orchestrator handles custom exceptions on a per-file basis inside batch operations. If file 2 in a list of 5 uploads is corrupted, files 1, 3, 4, and 5 will still import successfully.
-- **Deduplication**: Content-hash indexing guarantees that identical files are not indexed repeatedly, preserving CPU, storage, and database footprint.
+### Query and Retrieval Flow
+```mermaid
+graph TD
+    User([User Question]) -->|1. Submit text| UI[Streamlit Page]
+    UI -->|2. call ask| Pipe[CortexRAGPipeline]
+    
+    %% Session Resolution
+    Pipe -->|3. Resolve active session| SES[RAGSession]
+    SES -->|4. Fetch past turns| Pipe
+    
+    %% Semantic retrieval
+    Pipe -->|5. retrieve| Ret[SemanticRetriever]
+    Ret -->|6. embed query| ES[EmbeddingService]
+    ES -->|7. Generate query vector| API[models/text-embedding-004]
+    API -->|8. Return query vector| ES
+    ES -->|9. Query matching candidates| Repo[VectorRepository]
+    Repo -->|10. Cosine/MMR search| DB[(ChromaDB)]
+    DB -->|11. Return retrieved chunks| Repo
+    Repo -->|12. Return list of EmbeddedChunks| Ret
+    Ret -->|13. Perform MMR diversity re-ranking| Pipe
+    
+    %% Prompt Compilation
+    Pipe -->|14. build_prompt| PB[RAGPromptBuilder]
+    PB -->|15. Compress context & inject citations| Pipe
+    
+    %% Inference
+    Pipe -->|16. generate response| LLM[GeminiLLM]
+    LLM -->|17. Execute inference request| LLM_API[gemini-1.5-flash]
+    LLM_API -->|18. Return generated text| LLM
+    LLM -->|19. Parse citations| Pipe
+    
+    %% Memory updates and Return
+    Pipe -->|20. Save turns| SES
+    Pipe -->|21. Return RAGResponse| UI
+    UI -->|22. Render markdown & citation cards| User
+```
+
+---
+
+## 2. Decoupled Service Layers
+
+* **Presentation Layer (`ui/`)**: Reusable UI blocks and multi-page configurations using Streamlit.
+* **Orchestration Layer (`core/rag/`)**: Coordinates conversational state context and coordinates pipelines (`CortexRAGPipeline`, `RAGSession`).
+* **Domain Layer (`core/`)**:
+  * **`EmbeddingService`**: Embeds text using pluggable providers and caches vector calculations.
+  * **`SemanticRetriever`**: Implements MMR and Similarity algorithms.
+  * **`RAGPromptBuilder`**: Templates instructions and enforces token-character budgets.
+  * **`GeminiLLM`**: Wrapper around Google Gemini API featuring exponential backoff.
+  * **`DocumentProcessor`**: Orchestrates PDF loading, page sanitization, validation, hashing, and character chunking.
+* **Data Storage Layer (`core/vector_store/` & `core/repository/`)**:
+  * **`VectorRepository`**: Manages writes, updates, rollback states, collection versioning, and statistics calculations.
+  * **`ChromaVectorStore`**: Adapter for persistent ChromaDB client transactions.

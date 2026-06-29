@@ -1,0 +1,37 @@
+# Python temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases and uploads
+chroma_db/
+pdfs/
+logs/
+temp_uploads/
+*.log
+processed_files.json
+
+# Environment variables
+.env
+.env.example
+
+# IDE configurations
+.vscode/
+.idea/
+.gemini/
+.agents/
+antigravity-ide/
+
+# Git and CI
+.git/
+.github/
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+.pre-commit-config.yaml
+pyproject.toml
