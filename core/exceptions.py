@@ -80,3 +80,39 @@ class InvalidMetadataException(DocumentProcessingException):
     """Raised when a chunk lacks required metadata keys (e.g. chunk_id)."""
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class CollectionNotFoundException(DocumentProcessingException):
+    """Raised when a collection is not found in the vector database."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class DuplicateIdException(DocumentProcessingException):
+    """Raised when a duplicate vector ID is inserted or conflict occurs."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InvalidVectorException(DocumentProcessingException):
+    """Raised when a vector embedding has invalid dimensions or format."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmptyCollectionException(DocumentProcessingException):
+    """Raised when operating on a vector collection containing no documents."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class StorageCorruptionException(DocumentProcessingException):
+    """Raised when the local vector database files are corrupted or unreadable."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class ConnectionFailureException(DocumentProcessingException):
+    """Raised when connection to the vector database service fails."""
+    def __init__(self, message: str):
+        super().__init__(message)
