@@ -116,3 +116,27 @@ class ConnectionFailureException(DocumentProcessingException):
     """Raised when connection to the vector database service fails."""
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class EmptyQueryException(DocumentProcessingException):
+    """Raised when the provided search query is empty or whitespace."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InvalidQueryException(DocumentProcessingException):
+    """Raised when the search query format or character length constraints are violated."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class RetrievalFailureException(DocumentProcessingException):
+    """Raised when errors happen during candidate retrieval or semantic ranking."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmbeddingFailureException(DocumentProcessingException):
+    """Raised when generating embeddings for a search query fails."""
+    def __init__(self, message: str):
+        super().__init__(message)
