@@ -1,0 +1,90 @@
+/* Custom Skincare Skewed Premium Theme for Cortex AI */
+
+/* Glassmorphism Card Container */
+.glass-card {
+    background: rgba(30, 41, 59, 0.65) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    margin-bottom: 20px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(56, 189, 248, 0.4) !important;
+    box-shadow: 0 12px 40px 0 rgba(56, 189, 248, 0.15) !important;
+}
+
+/* Gradient Text Title styling */
+.gradient-title {
+    background: linear-gradient(135deg, #38BDF8 0%, #8B5CF6 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+}
+
+/* Subtitle Styling */
+.subtitle-text {
+    color: #94A3B8 !important;
+    font-size: 1.1rem !important;
+    margin-bottom: 25px !important;
+}
+
+/* Custom Citation Card layout */
+.citation-box {
+    background: rgba(15, 23, 42, 0.4) !important;
+    border-left: 4px solid #38BDF8 !important;
+    border-radius: 6px !important;
+    padding: 12px 16px !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    font-size: 0.9rem !important;
+    color: #E2E8F0 !important;
+}
+
+/* Status Indicator Dots */
+.status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+.status-healthy {
+    background-color: #10B981; /* Emerald Green */
+    box-shadow: 0 0 8px #10B981;
+}
+.status-unhealthy {
+    background-color: #EF4444; /* Red */
+    box-shadow: 0 0 8px #EF4444;
+}
+
+/* Gradient Buttons */
+div.stButton > button:first-child {
+    background: linear-gradient(135deg, #38BDF8 0%, #6366F1 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2) !important;
+}
+
+div.stButton > button:first-child:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35) !important;
+    background: linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%) !important;
+}
+
+/* Sidebar Custom Details */
+.sidebar-panel {
+    background: rgba(15, 23, 42, 0.3) !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
