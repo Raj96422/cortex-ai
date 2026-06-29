@@ -158,3 +158,39 @@ class InvalidTemplateException(DocumentProcessingException):
     """Raised when a prompt template configuration is corrupt or contains invalid placeholding syntax."""
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class APIKeyMissingException(DocumentProcessingException):
+    """Raised when the Gemini API key is missing or invalid."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class LLMTimeoutException(DocumentProcessingException):
+    """Raised when the LLM service request times out."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class RateLimitException(DocumentProcessingException):
+    """Raised when the LLM API quota limits or rate limiting throttles requests."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class SafetyBlockException(DocumentProcessingException):
+    """Raised when the LLM output is blocked by configured safety parameters."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmptyResponseException(DocumentProcessingException):
+    """Raised when the LLM service returns an empty or null response."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class NetworkFailureException(DocumentProcessingException):
+    """Raised when network failures prevent contacting the LLM API."""
+    def __init__(self, message: str):
+        super().__init__(message)
