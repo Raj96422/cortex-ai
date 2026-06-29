@@ -32,3 +32,51 @@ class DuplicateDocumentException(DocumentProcessingException):
     """Raised when a document with an identical SHA-256 hash has already been processed."""
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class MissingAPIKeyException(DocumentProcessingException):
+    """Raised when the Google GenAI API key is missing or not set in configuration."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InvalidTextException(DocumentProcessingException):
+    """Raised when the text content provided for embedding is invalid (e.g., not a string)."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmptyTextException(DocumentProcessingException):
+    """Raised when the text content provided for embedding is empty or whitespace-only."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class GeminiAPIException(DocumentProcessingException):
+    """Raised when the underlying Gemini API returns an error during embedding generation."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmbeddingTimeoutException(DocumentProcessingException):
+    """Raised when the connection or request to the Google GenAI API times out."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class RateLimitException(DocumentProcessingException):
+    """Raised when the Google GenAI API quota or rate limits are exceeded."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class EmbeddingGenerationException(DocumentProcessingException):
+    """Raised when vector embedding generation fails due to internal errors."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InvalidMetadataException(DocumentProcessingException):
+    """Raised when a chunk lacks required metadata keys (e.g. chunk_id)."""
+    def __init__(self, message: str):
+        super().__init__(message)

@@ -39,3 +39,11 @@ RAG_SYSTEM_PROMPT: Final[str] = (
 
 # Export Config
 DEFAULT_EXPORT_FILENAME: Final[str] = "cortex_chat_history.md"
+
+# Embedding Service Configuration Parameters
+EMBEDDING_BATCH_SIZE: Final[int] = 16
+EMBEDDING_MAX_RETRIES: Final[int] = 3
+EMBEDDING_RETRY_DELAY: Final[float] = 1.0
+EMBEDDING_TIMEOUT: Final[float] = 30.0
+MAX_EMBEDDING_TEXT_LENGTH: Final[int] = 10000       # Maximum character length per text chunk
+EMBEDDING_CACHE_LIMIT: Final[int] = 10000           # Cap to prevent memory leaks from excessive entries
