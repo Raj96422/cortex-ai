@@ -140,3 +140,21 @@ class EmbeddingFailureException(DocumentProcessingException):
     """Raised when generating embeddings for a search query fails."""
     def __init__(self, message: str):
         super().__init__(message)
+
+
+class PromptTooLargeException(DocumentProcessingException):
+    """Raised when the constructed prompt size exceeds character or token budgets."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class TemplateNotFoundException(DocumentProcessingException):
+    """Raised when the requested prompt template does not exist."""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class InvalidTemplateException(DocumentProcessingException):
+    """Raised when a prompt template configuration is corrupt or contains invalid placeholding syntax."""
+    def __init__(self, message: str):
+        super().__init__(message)
